@@ -49,7 +49,6 @@ export default function Dashboard() {
           desc="Personal coaches" 
           icon="👨‍🏫"
           color="#00d4ff"
-          locked={!hasMembership} 
           onClick={() => navigate("/trainers")} 
         />
         <Card 

@@ -8,6 +8,7 @@ import Members from "./pages/Members";
 import Payments from "./pages/Payments";
 import Profile from "./pages/Profile";
 import Attendance from "./pages/Attendance";
+import Trainers from "./pages/Trainers";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
@@ -61,6 +62,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Attendance />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/trainers"
+            element={
+              <ProtectedRoute>
+                <Trainers />
               </ProtectedRoute>
             }
           />

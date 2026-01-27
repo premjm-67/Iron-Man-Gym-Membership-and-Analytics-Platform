@@ -1,36 +1,14 @@
 [
   {
-    "id": 1766202288923,
-    "firstName": "Prem",
-    "lastName": "JM",
+    "id": 1769535839522,
+    "firstName": "prem",
+    "lastName": "jm",
     "age": "19",
     "dob": "2006-04-27",
-    "phone": "08925782356",
+    "phone": "8925782356",
+    "passwordHash": "$2a$10$.CNQhfswFq326HoYxeMLUOaHQKyva6luEw3NB9bGWha0UTA1bOrO6",
     "subscription": null,
     "attendance": [],
-    "createdAt": "2025-12-20T03:44:48.923Z"
-  },
-  {
-    "id": 1767436884302,
-    "firstName": "Prem",
-    "lastName": "JM",
-    "age": "19",
-    "dob": "2006-04-27",
-    "phone": "123456789",
-    "subscription": null,
-    "attendance": [],
-    "createdAt": "2026-01-03T10:41:24.302Z"
-  },
-  {
-    "id": 1767549071796,
-    "firstName": "Prem",
-    "lastName": "JM",
-    "age": "19",
-    "dob": "2006-04-27",
-    "phone": "123456788",
-    "passwordHash": "$2a$10$P000PAFXnSph8iSfHvPWfOkNUIzLcxUvZZ5YqFXX/e6dTUZ6fRJXu",
-    "subscription": null,
-    "attendance": [],
-    "createdAt": "2026-01-04T17:51:11.796Z"
+    "createdAt": "2026-01-27T17:43:59.522Z"
   }
 ]
