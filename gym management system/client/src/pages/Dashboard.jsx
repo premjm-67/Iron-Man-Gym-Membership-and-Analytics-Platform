@@ -6,56 +6,57 @@ export default function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const hasMembership = user?.membership || user?.plan;
+  const hasMembership = !!(user?.membership && user.membership !== "none" && user.membership !== "");
 
   return (
-    <div className="dashboard">
-      {/* HEADER */}
-      <header className="header">
-        <div>
-          <h1>Welcome, <span style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{user?.firstName || "Member"}</span></h1>
-          <p>Premium fitness management system</p>
+    <div className="dashboard-view">
+      {/* NAVIGATION - Using your structure with premium red accents */}
+      <nav className="dash-nav">
+        <div className="nav-left">
+          Welcome, <span className="user-name">{user?.firstName || "Member"}</span>
         </div>
-        <button className="logout" onClick={logout}>Logout</button>
+        <div className="nav-center">IRON MAN FITNESS STUDIO</div>
+        <div className="nav-right">
+          <button className="logout-btn" onClick={logout}>Logout</button>
+        </div>
+      </nav>
+
+      {/* HERO STATUS */}
+      <header className="dash-hero">
+        <h1>Member <span className="text-gradient">Dashboard</span></h1>
+        <div className="status-container">
+          {hasMembership ? (
+            <span className="status-badge active">✓ Active Premium Member</span>
+          ) : (
+            <div className="status-inactive">
+              <span className="status-badge inactive">○ Inactive Account</span>
+              <button className="activate-cta" onClick={() => navigate("/members")}>Activate Plan</button>
+            </div>
+          )}
+        </div>
       </header>
 
-      {/* HERO */}
-      <section className="hero">
-        <h2>Membership Status</h2>
-
-        {hasMembership ? (
-          <span className="badge active">✓ Active • Premium</span>
-        ) : (
-          <>
-            <span className="badge inactive">○ Inactive</span>
-            <button className="cta" onClick={() => navigate("/members")}>
-              Activate Membership
-            </button>
-          </>
-        )}
-      </section>
-
-      {/* GRID */}
-      <section className="grid">
+      {/* GRID SECTION */}
+      <main className="dash-grid">
         <Card 
           title="Membership" 
           desc="Plans & validity" 
           icon="🎫"
-          color="#6366f1"
+          color="#ef4444" /* Red */
           onClick={() => navigate("/members")} 
         />
         <Card 
           title="Trainers" 
           desc="Personal coaches" 
-          icon="👨‍🏫"
-          color="#00d4ff"
+          icon="💪"
+          color="#0f172a" /* Dark Slate */
           onClick={() => navigate("/trainers")} 
         />
         <Card 
           title="Attendance" 
           desc="Visit history" 
           icon="📅"
-          color="#f59e0b"
+          color="#b91c1c" /* Deep Red */
           locked={!hasMembership} 
           onClick={() => navigate("/attendance")} 
         />
@@ -63,22 +64,21 @@ export default function Dashboard() {
           title="Payments" 
           desc="Invoices & bills" 
           icon="💳"
-          color="#8b5cf6"
+          color="#334155" /* Muted Slate */
           onClick={() => navigate("/payments")} 
         />
         <Card 
           title="Profile" 
           desc="Account settings" 
           icon="⚙️"
-          color="#10b981"
+          color="#ef4444" /* Red */
           onClick={() => navigate("/profile")} 
         />
-      </section>
+      </main>
 
       {/* FOOTER */}
-      <footer className="footer">
-        <span>GymPro © 2026</span>
-        <span>Premium Fitness Management</span>
+      <footer className="dash-footer-branded">
+        <p>IRON MAN FITNESS STUDIO • GLOBAL PERFORMANCE LABS</p>
       </footer>
     </div>
   );
@@ -87,30 +87,22 @@ export default function Dashboard() {
 function Card({ title, desc, icon, color, locked, onClick }) {
   return (
     <div 
-      className={`card ${locked ? "locked" : ""}`}
+      className={`dash-card ${locked ? "locked-card" : ""}`}
       onClick={!locked ? onClick : undefined}
-      style={{
-        background: "#ffffff",
-        borderColor: color,
-        position: "relative",
-      }}
-      onMouseEnter={(e) => {
-        if (!locked) {
-          e.currentTarget.style.background = `${color}08`;
-          e.currentTarget.style.boxShadow = `0 12px 32px ${color}25`;
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!locked) {
-          e.currentTarget.style.background = "#ffffff";
-          e.currentTarget.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.05)";
-        }
-      }}
+      style={{ "--accent": color }}
     >
-      <div style={{ fontSize: "32px", marginBottom: 12 }}>{icon}</div>
-      <h3 style={{ fontSize: "18px", fontWeight: 700, marginBottom: 6, margin: 0, color: "#1f2937" }}>{title}</h3>
-      <p style={{ color: "#6b7280", fontSize: "13px", margin: 0 }}>{desc}</p>
-      {locked && <span className="lock">🔒 Locked</span>}
+      <div className="card-top">
+        <span className="card-icon-box">{icon}</span>
+        {locked ? <span className="lock-tag">🔒 Locked</span> : <span className="active-dot">●</span>}
+      </div>
+      <div className="card-body">
+        <h3>{title}</h3>
+        <p>{desc}</p>
+      </div>
+      <div className="card-footer-action">
+        <span>{locked ? "Upgrade to View" : "Enter Section"}</span>
+        <span className="arrow">→</span>
+      </div>
     </div>
   );
 }

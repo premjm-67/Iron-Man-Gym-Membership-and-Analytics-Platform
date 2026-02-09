@@ -1,57 +1,35 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import "./trainers.css";
 
 const trainersData = [
   {
     id: 1,
-    name: "Alex Mitchell",
+    name: "Anbu",
     specialization: "Strength & Power",
-    phone: "+1 (555) 234-5678",
-    email: "alex.mitchell@gympro.com",
-    experience: "8 years",
-    image: "💪",
-    rating: 4.9,
-    certifications: ["NASM", "ISSA", "ACE"]
+    phone: "+91 98450 12345",
+    experience: "8 Years",
+    about: "Specializes in high-intensity strength training and powerlifting techniques."
   },
   {
     id: 2,
-    name: "Sarah Johnson",
+    name: "Surya",
     specialization: "HIIT & Cardio",
-    phone: "+1 (555) 345-6789",
-    email: "sarah.johnson@gympro.com",
-    experience: "6 years",
-    image: "🏃",
-    rating: 4.8,
-    certifications: ["NASM", "ACE"]
+    phone: "+91 98450 67890",
+    experience: "6 Years",
+    about: "Expert in functional fitness and rapid fat loss through movements."
   },
   {
     id: 3,
-    name: "Marcus Rodriguez",
-    specialization: "Bodybuilding & Mass",
-    phone: "+1 (555) 456-7890",
-    email: "marcus.rodriguez@gympro.com",
-    experience: "10 years",
-    image: "🏆",
-    rating: 5.0,
-    certifications: ["IFBB", "ISSA", "NASM"]
-  },
-  {
-    id: 4,
-    name: "Emily Chen",
-    specialization: "Yoga & Flexibility",
-    phone: "+1 (555) 567-8901",
-    email: "emily.chen@gympro.com",
-    experience: "7 years",
-    image: "🧘",
-    rating: 4.7,
-    certifications: ["RYT-200", "NASM"]
+    name: "Karthi",
+    specialization: "Bodybuilding",
+    phone: "+91 98450 54321",
+    experience: "10 Years",
+    about: "Focused on muscle hypertrophy and competition-level physique coaching."
   }
 ];
 
 export default function Trainers() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [selectedTrainer, setSelectedTrainer] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -61,178 +39,65 @@ export default function Trainers() {
     setShowModal(true);
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setSelectedTrainer(null);
-  };
-
   return (
-    <div className="trainers-container">
-      {/* HEADER */}
-      <header className="trainers-header">
-        <div>
-          <h1>Iron Man Gym Trainers</h1>
-          <p>Select your dedicated fitness coach</p>
+    <div className="trainers-view">
+      <nav className="trainer-nav">
+        <div className="nav-left">
+          <button className="back-link" onClick={() => navigate("/dashboard")}>← Dashboard</button>
         </div>
-        <button className="back-btn" onClick={() => navigate("/dashboard")}>← Back</button>
+        <div className="nav-center">IRON MAN FITNESS STUDIO</div>
+      </nav>
+
+      <header className="hero-compact">
+        <h1>Our Trainers</h1>
+        <p>For more information please contact.</p>
       </header>
 
-      {/* STATS SECTION */}
-      <section className="trainers-stats">
-        <div className="stat-card">
-          <div className="stat-icon">👥</div>
-          <div className="stat-info">
-            <h3>4</h3>
-            <p>Expert Trainers</p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">⭐</div>
-          <div className="stat-info">
-            <h3>4.85</h3>
-            <p>Avg. Rating</p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">📋</div>
-          <div className="stat-info">
-            <h3>31+</h3>
-            <p>Years Combined</p>
-          </div>
-        </div>
-      </section>
-
-      {/* TRAINERS GRID */}
-      <section className="trainers-grid">
+      <main className="trainers-grid-small">
         {trainersData.map((trainer) => (
-          <div key={trainer.id} className="trainer-card">
-            <div className="trainer-header">
-              <div className="trainer-avatar">{trainer.image}</div>
-              <div className="trainer-rating">
-                <span className="stars">★</span>
-                <span className="rating-number">{trainer.rating}</span>
+          <div key={trainer.id} className="trainer-mini-card" onClick={() => handleSelectTrainer(trainer)}>
+            <div className="mini-card-top">
+              <span className="mini-spec">{trainer.specialization}</span>
+              <h3>{trainer.name}</h3>
+            </div>
+            
+            <div className="mini-card-meta">
+              <div className="meta-row">
+                <span className="label">Exp:</span>
+                <span className="value">{trainer.experience}</span>
+              </div>
+              <div className="meta-row">
+                <span className="label">Call:</span>
+                <span className="value">{trainer.phone}</span>
               </div>
             </div>
-
-            <div className="trainer-content">
-              <h3 className="trainer-name">{trainer.name}</h3>
-              <p className="trainer-specialization">{trainer.specialization}</p>
-
-              <div className="trainer-meta">
-                <div className="meta-item">
-                  <span className="meta-label">Experience</span>
-                  <span className="meta-value">{trainer.experience}</span>
-                </div>
-                <div className="meta-item">
-                  <span className="meta-label">Certifications</span>
-                  <span className="meta-value">{trainer.certifications.length} Pro</span>
-                </div>
-              </div>
-
-              <div className="trainer-contact">
-                <a href={`tel:${trainer.phone}`} className="contact-link">
-                  📞 {trainer.phone}
-                </a>
-              </div>
-            </div>
-
-            <button 
-              className="select-btn"
-              onClick={() => handleSelectTrainer(trainer)}
-            >
-              View Details
-            </button>
+            <div className="mini-footer">View Details →</div>
           </div>
         ))}
-      </section>
+      </main>
 
-      {/* MODAL */}
       {showModal && selectedTrainer && (
-        <div className="modal-overlay" onClick={handleCloseModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={handleCloseModal}>✕</button>
-
+        <div className="mini-modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="mini-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <div className="modal-avatar">{selectedTrainer.image}</div>
-              <div className="modal-header-info">
-                <h2>{selectedTrainer.name}</h2>
-                <p className="modal-specialty">{selectedTrainer.specialization}</p>
-                <div className="modal-rating">
-                  <span className="rating-stars">{'★'.repeat(Math.floor(selectedTrainer.rating))} ☆</span>
-                  <span className="rating-value">{selectedTrainer.rating}/5.0</span>
-                </div>
-              </div>
+               <h3>{selectedTrainer.name}</h3>
+               <span>{selectedTrainer.specialization}</span>
             </div>
-
-            <div className="modal-body">
-              <div className="modal-section">
-                <h4>Contact Information</h4>
-                <div className="contact-info">
-                  <div className="info-row">
-                    <span className="info-icon">📞</span>
-                    <div>
-                      <p className="info-label">Phone</p>
-                      <p className="info-value">{selectedTrainer.phone}</p>
-                    </div>
-                  </div>
-                  <div className="info-row">
-                    <span className="info-icon">📧</span>
-                    <div>
-                      <p className="info-label">Email</p>
-                      <p className="info-value">{selectedTrainer.email}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="modal-section">
-                <h4>Professional Details</h4>
-                <div className="details-grid">
-                  <div className="detail-item">
-                    <p className="detail-label">Experience</p>
-                    <p className="detail-value">{selectedTrainer.experience}</p>
-                  </div>
-                  <div className="detail-item">
-                    <p className="detail-label">Rating</p>
-                    <p className="detail-value">{selectedTrainer.rating}/5</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="modal-section">
-                <h4>Certifications</h4>
-                <div className="certifications-list">
-                  {selectedTrainer.certifications.map((cert, idx) => (
-                    <span key={idx} className="cert-badge">{cert}</span>
-                  ))}
-                </div>
-              </div>
+            <div className="modal-content">
+              <p><strong>Experience:</strong> {selectedTrainer.experience}</p>
+              <p><strong>Contact:</strong> {selectedTrainer.phone}</p>
+              <p className="about-text">{selectedTrainer.about}</p>
             </div>
-
-            <div className="modal-actions">
-              <button 
-                className="action-btn secondary"
-                onClick={handleCloseModal}
-              >
-                Close
-              </button>
-              <button 
-                className="action-btn primary"
-                onClick={() => {
-                  alert(`Schedule session with ${selectedTrainer.name}\nPhone: ${selectedTrainer.phone}`);
-                  handleCloseModal();
-                }}
-              >
-                Schedule Session
-              </button>
+            <div className="modal-btns">
+              <button className="m-btn-close" onClick={() => setShowModal(false)}>Close</button>
+              <a href={`tel:${selectedTrainer.phone}`} className="m-btn-call">Call</a>
             </div>
           </div>
         </div>
       )}
 
-      {/* FOOTER */}
-      <footer className="trainers-footer">
-        <p>Contact a trainer directly or book a session through your account</p>
+      <footer className="mini-footer-branded">
+        <p>IRON MAN FITNESS STUDIO</p>
       </footer>
     </div>
   );

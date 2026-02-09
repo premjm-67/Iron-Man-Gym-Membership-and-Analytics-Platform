@@ -1,9 +1,11 @@
 import { useState } from "react";
-import "./members.css";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import "./dashboard.css"; 
 
 export default function Profile() {
   const { user, updateProfile } = useAuth();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -11,24 +13,18 @@ export default function Profile() {
 
   const membership = user?.membership || user?.plan || null;
   const createdAt = user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "—";
-  const lastLogin = user?.lastLogin ? new Date(user.lastLogin).toLocaleString() : "—";
-  const initials = (user?.firstName || user?.name || "Member")[0]?.toUpperCase() || "M";
-  const fullName = `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || user?.name || "Member";
+  const initials = (user?.firstName || "M")[0]?.toUpperCase();
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
+    const formData = new FormData(e.currentTarget);
+    const firstName = formData.get("firstName").trim();
+    const lastName = formData.get("lastName").trim();
+    const phone = formData.get("phone").trim();
 
-    const form = e.target.closest("form");
-    const firstName = form.querySelector("#firstName").value.trim();
-    const lastName = form.querySelector("#lastName").value.trim();
-    const phone = form.querySelector("#phone").value.trim();
-
-    if (!firstName) {
-      setErrorMessage("First name is required");
-      return;
-    }
+    if (!firstName) return setErrorMessage("First name is required");
 
     setIsSaving(true);
     try {
@@ -38,426 +34,160 @@ export default function Profile() {
         setIsEditing(false);
         setTimeout(() => setSuccessMessage(""), 3000);
       } else {
-        setErrorMessage("Failed to update profile. Please try again.");
+        setErrorMessage("Failed to update profile.");
       }
     } catch (error) {
-      setErrorMessage("An error occurred. Please try again.");
+      setErrorMessage("An error occurred.");
     } finally {
       setIsSaving(false);
     }
   };
 
+  // --- REUSABLE STYLE OBJECTS ---
+  const inputWrapperStyle = (active, locked) => ({
+    display: "flex",
+    alignItems: "center",
+    background: locked ? "#f1f5f9" : active ? "#fff" : "#f8fafc",
+    border: `2px solid ${active ? "#6366f1" : "#edf2f7"}`,
+    borderRadius: "14px",
+    padding: "0 16px",
+    transition: "all 0.3s ease",
+    boxShadow: active ? "0 10px 15px -3px rgba(99, 102, 241, 0.1)" : "none",
+  });
+
+  const labelStyle = {
+    fontSize: "11px",
+    fontWeight: 800,
+    color: "#64748b",
+    textTransform: "uppercase",
+    letterSpacing: "0.8px",
+    marginBottom: "8px",
+    display: "block",
+  };
+
   return (
-    <div className="page-wrapper">
-      <header className="site-header">
-        <div className="brand">GymPro</div>
-        <div className="nav">
-          <button className="btn ghost" onClick={() => window.location.href="/dashboard"}>
-            Dashboard
-          </button>
-          <button className="btn ghost" onClick={() => window.location.href="/members"}>
-            Membership
-          </button>
+    <div className="dashboard-view">
+      {/* NAVIGATION */}
+      <nav className="dash-nav">
+        <div className="nav-left" onClick={() => navigate("/dashboard")} style={{cursor: 'pointer'}}>
+          ← <span className="user-name">Back to Dashboard</span>
         </div>
+        <div className="nav-center">IRON MAN FITNESS STUDIO</div>
+        <div className="nav-right">
+          <div className="mini-avatar-nav">{initials}</div>
+        </div>
+      </nav>
+
+      {/* HERO SECTION */}
+      <header className="dash-hero">
+        <div className="profile-avatar-large">{initials}</div>
+        <h1>{user?.firstName}'s <span className="text-gradient">Profile</span></h1>
+        <p>Manage your account settings and membership plan</p>
       </header>
 
-      <main className="payments-page" style={{ paddingTop: 32, paddingBottom: 40 }}>
-        {/* Header Section */}
-        <header className="membership-hero" style={{ marginBottom: 32 }}>
-          <div className="hero-left">
-            <h1 style={{ fontSize: "32px", marginBottom: 8 }}>My Profile</h1>
-            <p className="lead">View and manage your personal information and subscription</p>
-          </div>
-          <div className="hero-right">
-            <div className="status-panel" aria-hidden>
-              <div
-                className="avatar"
-                style={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: "50%",
-                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "32px",
-                  fontWeight: 700,
-                  color: "#fff",
-                }}
-              >
-                {initials}
-              </div>
-              <div className="name" style={{ fontSize: "20px", fontWeight: 600, marginTop: 12 }}>
-                {fullName}
-              </div>
+      <main className="dash-grid profile-grid" style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: "25px", padding: "0 5% 60px", maxWidth: "1200px", margin: "0 auto" }}>
+        
+        {/* PERSONAL INFO CARD */}
+        <div className="dash-card" style={{ background: "white", padding: "40px", borderRadius: "24px", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
+            <div>
+              <h2 style={{ fontSize: "22px", fontWeight: 800, color: "#0f172a", margin: 0 }}>Personal Details</h2>
+              <p style={{ fontSize: "13px", color: "#94a3b8", margin: "4px 0 0" }}>Update your contact information</p>
             </div>
-          </div>
-        </header>
-
-        {/* Alert Messages */}
-        {successMessage && (
-          <div
-            style={{
-              padding: "12px 16px",
-              background: "#ecfdf5",
-              border: "1px solid #86efac",
-              borderRadius: "8px",
-              color: "#166534",
-              marginBottom: 20,
-              fontSize: "14px",
-              fontWeight: 500,
-            }}
-          >
-            ✓ {successMessage}
-          </div>
-        )}
-        {errorMessage && (
-          <div
-            style={{
-              padding: "12px 16px",
-              background: "#fef2f2",
-              border: "1px solid #fca5a5",
-              borderRadius: "8px",
-              color: "#991b1b",
-              marginBottom: 20,
-              fontSize: "14px",
-              fontWeight: 500,
-            }}
-          >
-            ✕ {errorMessage}
-          </div>
-        )}
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-          {/* Personal Information Card */}
-          <div
-            className="pay-card profile-card"
-            style={{
-              background: "#fff",
-              border: "1px solid var(--card-border)",
-              color: "var(--text-dark)",
-              padding: "24px",
-              borderRadius: "12px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-              gridColumn: "1 / -1",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 24,
-              }}
-            >
-              <h2 style={{ fontSize: "20px", fontWeight: 600, margin: 0 }}>Personal Information</h2>
-              {!isEditing && (
-                <button
-                  className="btn ghost"
-                  onClick={() => setIsEditing(true)}
-                  style={{ padding: "8px 16px", fontSize: "14px" }}
-                >
-                  Edit Profile
-                </button>
-              )}
-            </div>
-
-            <form className="profile-form" onSubmit={handleSaveProfile}>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 16,
-                  marginBottom: 16,
-                }}
+            {!isEditing && (
+              <button 
+                onClick={() => setIsEditing(true)}
+                style={{ background: "#f1f5f9", border: "none", padding: "10px 20px", borderRadius: "99px", color: "#6366f1", fontWeight: 700, cursor: "pointer" }}
               >
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <label
-                    htmlFor="firstName"
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: 600,
-                      marginBottom: 8,
-                      color: "var(--text-dark)",
-                    }}
-                  >
-                    First name
-                  </label>
-                  <input
-                    id="firstName"
-                    name="firstName"
-                    type="text"
-                    defaultValue={user?.firstName || ""}
-                    disabled={!isEditing}
-                    style={{
-                      padding: "10px 12px",
-                      border: "1px solid var(--card-border)",
-                      borderRadius: "6px",
-                      fontSize: "14px",
-                      background: isEditing ? "#fff" : "#f5f5f5",
-                      cursor: isEditing ? "text" : "default",
-                      transition: "all 0.2s ease",
-                    }}
-                  />
-                </div>
-
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <label
-                    htmlFor="lastName"
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: 600,
-                      marginBottom: 8,
-                      color: "var(--text-dark)",
-                    }}
-                  >
-                    Last name
-                  </label>
-                  <input
-                    id="lastName"
-                    name="lastName"
-                    type="text"
-                    defaultValue={user?.lastName || ""}
-                    disabled={!isEditing}
-                    style={{
-                      padding: "10px 12px",
-                      border: "1px solid var(--card-border)",
-                      borderRadius: "6px",
-                      fontSize: "14px",
-                      background: isEditing ? "#fff" : "#f5f5f5",
-                      cursor: isEditing ? "text" : "default",
-                      transition: "all 0.2s ease",
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column", marginBottom: 16 }}>
-                <label
-                  htmlFor="email"
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    marginBottom: 8,
-                    color: "var(--text-dark)",
-                  }}
-                >
-                  Email address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  defaultValue={user?.email || ""}
-                  disabled
-                  style={{
-                    padding: "10px 12px",
-                    border: "1px solid var(--card-border)",
-                    borderRadius: "6px",
-                    fontSize: "14px",
-                    background: "#f5f5f5",
-                    color: "rgba(17,24,39,0.6)",
-                    cursor: "not-allowed",
-                  }}
-                />
-                <small style={{ color: "rgba(17,24,39,0.6)", marginTop: 6, fontSize: "12px" }}>
-                  Email cannot be changed
-                </small>
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column", marginBottom: 24 }}>
-                <label
-                  htmlFor="phone"
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    marginBottom: 8,
-                    color: "var(--text-dark)",
-                  }}
-                >
-                  Phone number
-                </label>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  defaultValue={user?.phone || ""}
-                  disabled={!isEditing}
-                  style={{
-                    padding: "10px 12px",
-                    border: "1px solid var(--card-border)",
-                    borderRadius: "6px",
-                    fontSize: "14px",
-                    background: isEditing ? "#fff" : "#f5f5f5",
-                    cursor: isEditing ? "text" : "default",
-                    transition: "all 0.2s ease",
-                  }}
-                  placeholder="Enter phone number"
-                />
-              </div>
-
-              {isEditing && (
-                <div style={{ display: "flex", gap: 12 }}>
-                  <button
-                    type="button"
-                    className="btn ghost"
-                    onClick={() => {
-                      setIsEditing(false);
-                      setErrorMessage("");
-                    }}
-                    style={{ flex: 1, padding: "10px 16px" }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn primary"
-                    disabled={isSaving}
-                    style={{
-                      flex: 1,
-                      padding: "10px 16px",
-                      opacity: isSaving ? 0.6 : 1,
-                      cursor: isSaving ? "not-allowed" : "pointer",
-                    }}
-                  >
-                    {isSaving ? "Saving..." : "Save changes"}
-                  </button>
-                </div>
-              )}
-            </form>
-          </div>
-
-          {/* Subscription Card */}
-          <div
-            style={{
-              background: "#fff",
-              border: "1px solid var(--card-border)",
-              color: "var(--text-dark)",
-              padding: "24px",
-              borderRadius: "12px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-              gridColumn: "1 / 2",
-            }}
-          >
-            <h3 style={{ fontSize: "16px", fontWeight: 600, marginBottom: 16, margin: 0 }}>
-              Current Subscription
-            </h3>
-            {membership ? (
-              <div>
-                <div
-                  style={{
-                    background: "linear-gradient(135deg, #00d4ff 0%, #0099ff 50%, #6633ff 100%)",
-                    color: "#fff",
-                    padding: "20px",
-                    borderRadius: "10px",
-                    marginBottom: 16,
-                    boxShadow: "0 8px 32px rgba(0, 153, 255, 0.3)",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                  }}
-                >
-                  <div style={{ fontSize: "18px", fontWeight: 700, marginBottom: 6 }}>
-                    {membership.title || membership.name || membership.plan || "Active Plan"}
-                  </div>
-                  {membership.desc && (
-                    <div style={{ fontSize: "13px", opacity: 0.95, lineHeight: "1.4" }}>
-                      {membership.desc}
-                    </div>
-                  )}
-                  <div style={{ marginTop: 12, fontSize: "12px", opacity: 0.85, fontWeight: 500 }}>
-                    ✓ Subscription Active
-                  </div>
-                </div>
-                <button
-                  className="btn ghost"
-                  onClick={() => window.location.href="/members"}
-                  style={{ width: "100%", padding: "10px", fontSize: "14px" }}
-                >
-                  View Other Plans
-                </button>
-              </div>
-            ) : (
-              <div>
-                <div
-                  style={{
-                    background: "linear-gradient(135deg, #ffa500 0%, #ff6b6b 100%)",
-                    border: "1px solid rgba(255, 165, 0, 0.3)",
-                    color: "#fff",
-                    padding: "20px",
-                    borderRadius: "10px",
-                    marginBottom: 16,
-                    fontSize: "14px",
-                    lineHeight: "1.5",
-                    boxShadow: "0 8px 32px rgba(255, 107, 107, 0.2)",
-                  }}
-                >
-                  <div style={{ fontWeight: 600, marginBottom: 4 }}>No Active Subscription</div>
-                  <div style={{ opacity: 0.95 }}>Choose a plan to unlock premium features and benefits.</div>
-                </div>
-                <button
-                  className="btn primary"
-                  onClick={() => window.location.href="/members"}
-                  style={{ width: "100%", padding: "10px", fontSize: "14px" }}
-                >
-                  Browse Plans
-                </button>
-              </div>
+                ✎ Edit Profile
+              </button>
             )}
           </div>
 
-          {/* Account Information Card */}
-          <div
-            style={{
-              background: "#fff",
-              border: "1px solid var(--card-border)",
-              color: "var(--text-dark)",
-              padding: "24px",
-              borderRadius: "12px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-              gridColumn: "2 / 3",
-            }}
-          >
-            <h3 style={{ fontSize: "16px", fontWeight: 600, marginBottom: 16, margin: 0 }}>
-              Account Information
-            </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <div>
-                <div style={{ fontSize: "12px", color: "rgba(17,24,39,0.6)", fontWeight: 500, marginBottom: 4 }}>
-                  Member Since
-                </div>
-                <div style={{ fontSize: "14px", fontWeight: 500 }}>{createdAt}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: "12px", color: "rgba(17,24,39,0.6)", fontWeight: 500, marginBottom: 4 }}>
-                  Last Login
-                </div>
-                <div style={{ fontSize: "14px", fontWeight: 500 }}>{lastLogin}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: "12px", color: "rgba(17,24,39,0.6)", fontWeight: 500, marginBottom: 4 }}>
-                  Account Status
-                </div>
-                <div
-                  style={{
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    color: "#059669",
-                    background: "#ecfdf5",
-                    padding: "6px 12px",
-                    borderRadius: "4px",
-                    display: "inline-block",
-                  }}
-                >
-                  ✓ Active
-                </div>
-              </div>
+          {(successMessage || errorMessage) && (
+            <div className={`alert-box ${successMessage ? "success" : "error"}`} style={{ marginBottom: "20px", padding: "12px", borderRadius: "10px", textAlign: "center", fontWeight: "700", background: successMessage ? "#dcfce7" : "#fee2e2", color: successMessage ? "#15803d" : "#b91c1c" }}>
+              {successMessage || errorMessage}
             </div>
+          )}
+
+          <form onSubmit={handleSaveProfile}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+              
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <label style={labelStyle}>First Name</label>
+                <div style={inputWrapperStyle(isEditing, false)}>
+                  <span style={{ marginRight: "12px", opacity: 0.5 }}>👤</span>
+                  <input name="firstName" defaultValue={user?.firstName} disabled={!isEditing} style={{ width: "100%", padding: "14px 0", border: "none", background: "transparent", outline: "none", fontWeight: 600 }} />
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <label style={labelStyle}>Last Name</label>
+                <div style={inputWrapperStyle(isEditing, false)}>
+                  <span style={{ marginRight: "12px", opacity: 0.5 }}>👤</span>
+                  <input name="lastName" defaultValue={user?.lastName} disabled={!isEditing} style={{ width: "100%", padding: "14px 0", border: "none", background: "transparent", outline: "none", fontWeight: 600 }} />
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gridColumn: "1 / -1" }}>
+                <label style={labelStyle}>Email Address</label>
+                <div style={inputWrapperStyle(false, true)}>
+                  <span style={{ marginRight: "12px", opacity: 0.5 }}>✉</span>
+                  <input value={user?.email || ""} disabled style={{ width: "100%", padding: "14px 0", border: "none", background: "transparent", outline: "none", fontWeight: 600, color: "#94a3b8" }} />
+                  <span style={{ fontSize: "9px", fontWeight: 900, background: "#e2e8f0", padding: "3px 8px", borderRadius: "6px", color: "#64748b" }}>LOCKED</span>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gridColumn: "1 / -1" }}>
+                <label style={labelStyle}>Phone Number</label>
+                <div style={inputWrapperStyle(isEditing, false)}>
+                  <span style={{ marginRight: "12px", opacity: 0.5 }}>📞</span>
+                  <input name="phone" defaultValue={user?.phone} disabled={!isEditing} placeholder="Add phone number" style={{ width: "100%", padding: "14px 0", border: "none", background: "transparent", outline: "none", fontWeight: 600 }} />
+                </div>
+              </div>
+
+            </div>
+
+            {isEditing && (
+              <div style={{ display: "flex", gap: "15px", marginTop: "30px" }}>
+                <button type="button" onClick={() => setIsEditing(false)} style={{ flex: 1, background: "#f1f5f9", border: "none", padding: "14px", borderRadius: "14px", fontWeight: 700, color: "#64748b", cursor: "pointer" }}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={isSaving} style={{ flex: 2, background: "linear-gradient(90deg, #6366f1, #06b6d4)", color: "white", border: "none", padding: "14px", borderRadius: "14px", fontWeight: 800, cursor: "pointer", boxShadow: "0 4px 12px rgba(99, 102, 241, 0.3)" }}>
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            )}
+          </form>
+        </div>
+
+        {/* SUBSCRIPTION CARD */}
+        <div className="dash-card" style={{ background: "white", padding: "30px", borderRadius: "24px" }}>
+          <h2 style={{ fontSize: "18px", fontWeight: 800, marginBottom: "20px" }}>Subscription</h2>
+          <div style={{ background: membership ? "linear-gradient(135deg, #6366f1, #06b6d4)" : "#f1f5f9", padding: "20px", borderRadius: "16px", color: membership ? "white" : "#64748b" }}>
+            <h3 style={{ margin: 0, fontSize: "16px" }}>{membership ? "Active Premium" : "No Plan"}</h3>
+            <p style={{ fontSize: "13px", opacity: 0.8 }}>{membership ? "Unlimited Access" : "Join to start"}</p>
+          </div>
+          <button onClick={() => navigate("/members")} style={{ width: "100%", marginTop: "20px", background: "none", border: "2px solid #6366f1", color: "#6366f1", padding: "10px", borderRadius: "12px", fontWeight: "700", cursor: "pointer" }}>
+            Change Plan
+          </button>
+          
+          <div style={{ marginTop: "25px", borderTop: "1px solid #f1f5f9", paddingTop: "20px" }}>
+             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", marginBottom: "10px" }}>
+                <span style={{ color: "#94a3b8" }}>Member Since</span>
+                <span style={{ fontWeight: 700 }}>{createdAt}</span>
+             </div>
+             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
+                <span style={{ color: "#94a3b8" }}>Status</span>
+                <span style={{ fontWeight: 700, color: "#10b981" }}>✓ Verified</span>
+             </div>
           </div>
         </div>
+
       </main>
 
-      <footer className="site-footer">
-        <div>© GymPro 2026</div>
-        <div>Your fitness journey, managed professionally</div>
+      <footer className="dash-footer-branded">
+        <p>IRON MAN FITNESS STUDIO • ACCOUNT SECURITY PORTAL</p>
       </footer>
     </div>
   );

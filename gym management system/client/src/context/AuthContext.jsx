@@ -14,6 +14,14 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const restore = async () => {
       if (!token) return;
+
+      // START: HARDCODED OWNER SESSION RESTORE
+      if (token === "owner-token-8925782356") {
+        setUser({ name: "Prem", phone: "8925782356", role: "owner" });
+        return;
+      }
+      // END: HARDCODED OWNER SESSION RESTORE
+
       try {
         const res = await fetch(`${API}/members/me`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -66,6 +74,21 @@ export const AuthProvider = ({ children }) => {
 
   // LOGIN (PHONE + PASSWORD)
   const login = async (phone, password) => {
+    // START: HARDCODED OWNER LOGIN LOGIC
+    // This explicitly checks for the phone number and the password 'premfreak'
+    if (phone === "8925782356" && password === "premfreak") {
+      const ownerUser = { name: "Prem", phone: "8925782356", role: "owner" };
+      const ownerToken = "owner-token-8925782356";
+
+      localStorage.setItem('token', ownerToken);
+      setToken(ownerToken);
+      setUser(ownerUser);
+      
+      nav("/owner-dashboard"); 
+      return;
+    }
+    // END: HARDCODED OWNER LOGIN LOGIC
+
     try {
       const res = await fetch(`${API}/members/login`, {
         method: "POST",

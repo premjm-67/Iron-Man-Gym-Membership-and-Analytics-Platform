@@ -10,5 +10,29 @@
     "subscription": null,
     "attendance": [],
     "createdAt": "2026-01-27T17:43:59.522Z"
+  },
+  {
+    "id": 1770147673821,
+    "firstName": "kavin",
+    "lastName": "k",
+    "age": "20",
+    "dob": "2005-12-23",
+    "phone": "1234567888",
+    "passwordHash": "$2a$10$iJOzE2FxXpbtha7CKt7vW.DtRlBTQNbdffSb8GCXyQavtuZZx8b32",
+    "subscription": null,
+    "attendance": [],
+    "createdAt": "2026-02-03T19:41:13.821Z"
+  },
+  {
+    "id": 1770635397861,
+    "firstName": "Varun",
+    "lastName": "JM",
+    "age": "19",
+    "dob": "2005-03-21",
+    "phone": "2323232323",
+    "passwordHash": "$2a$10$YkY.qvcigzpsIVgFeUV4Nez9LLdA2slsSYUiV9TOZSaTW3cr4p5FO",
+    "subscription": null,
+    "attendance": [],
+    "createdAt": "2026-02-09T11:09:57.861Z"
   }
 ]

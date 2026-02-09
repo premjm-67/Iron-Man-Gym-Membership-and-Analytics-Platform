@@ -9,6 +9,7 @@ import Payments from "./pages/Payments";
 import Profile from "./pages/Profile";
 import Attendance from "./pages/Attendance";
 import Trainers from "./pages/Trainers";
+import OwnerDashboard from "./pages/Owner"; // 1. Import the Owner Dashboard
 import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
@@ -20,12 +21,24 @@ export default function App() {
           <Route path="/" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* PROTECTED */}
+          {/* PROTECTED USER ROUTES */}
           <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ... other user routes (members, payments, etc.) ... */}
+
+          {/* OWNER SPECIFIC ROUTE */}
+          <Route
+            path="/owner-dashboard"
+            element={
+              <ProtectedRoute>
+                <OwnerDashboard />
               </ProtectedRoute>
             }
           />
