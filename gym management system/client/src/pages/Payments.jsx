@@ -290,6 +290,7 @@ export default function Payments() {
           ) : payments.length > 0 ? (
             <div style={{ maxWidth: "1000px" }}>
               <div style={{ overflowX: "auto" }}>
+                <div style={{ background: 'rgba(17,24,39,0.04)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(17,24,39,0.04)' }}>
                 <table style={{
                   width: "100%",
                   borderCollapse: "collapse",
@@ -337,7 +338,16 @@ export default function Payments() {
                           {payment.plan}
                         </td>
                         <td style={{ padding: "16px", fontWeight: 600, color: "#059669" }}>
-                          {payment.amount}
+                          {(() => {
+                            const raw = payment.amount;
+                            if (typeof raw === 'string' && raw.trim().startsWith('₹')) return raw;
+                            if (typeof raw === 'string') {
+                              // try parse numeric
+                              const n = parseFloat(raw.replace(/[^0-9.]/g, '')) || 0;
+                              return `₹${new Intl.NumberFormat('en-IN').format(n)}`;
+                            }
+                            return `₹${new Intl.NumberFormat('en-IN').format(Number(raw || 0))}`;
+                          })()}
                         </td>
                         <td style={{ padding: "16px", color: "rgba(17,24,39,0.7)" }}>
                           {payment.method}
@@ -359,6 +369,7 @@ export default function Payments() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
           ) : (

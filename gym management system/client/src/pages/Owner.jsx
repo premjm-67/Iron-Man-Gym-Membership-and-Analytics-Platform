@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-// import axios from 'axios'; // Uncomment this when you are ready to fetch data
 import { useAuth } from '../context/AuthContext'; 
 import './owner.css';
 
@@ -7,21 +6,40 @@ const OwnerDashboard = () => {
     const { user, token } = useAuth();
     const [members, setMembers] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [stats, setStats] = useState({ total: 0, active: 0, expired: 0, revenue: 0 });
 
     // --- START: FETCHING LOGIC ---
     const fetchMemberData = useCallback(async () => {
         setLoading(true);
         try {
-            console.log('Fetching member data with token:', token);
             const response = await fetch('http://localhost:5000/api/owner/members', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await response.json();
-            console.log('API Response:', data);
             if (data.success) {
                 setMembers(data.members);
-            } else {
-                console.error('API Error:', data.message);
+                
+                // Calculate stats
+                const activeMembers = data.members.filter(m => m.subscription?.status === 'active').length;
+                const expiredMembers = data.members.filter(m => m.subscription?.status === 'expired').length;
+
+                // Prices may come as strings with currency symbol (e.g. "₹3,999").
+                // Normalize to numeric values before summing to avoid string concatenation
+                const totalRevenue = data.members.reduce((sum, m) => {
+                    const raw = m.subscription?.price ?? 0;
+                    if (typeof raw === 'string') {
+                        const n = parseFloat(raw.replace(/[^0-9.]/g, '')) || 0;
+                        return sum + n;
+                    }
+                    return sum + Number(raw || 0);
+                }, 0);
+
+                setStats({
+                    total: data.members.length,
+                    active: activeMembers,
+                    expired: expiredMembers,
+                    revenue: totalRevenue
+                });
             }
         } catch (error) {
             console.error("Error loading gym data:", error);
@@ -33,13 +51,10 @@ const OwnerDashboard = () => {
     useEffect(() => {
         if (user && user.role === 'owner' && token) {
             fetchMemberData();
-            
-            // Auto-refresh every 30 seconds
             const interval = setInterval(fetchMemberData, 30000);
             return () => clearInterval(interval);
         }
     }, [user, token, fetchMemberData]);
-    // --- END: FETCHING LOGIC ---
 
     // Security Check
     if (!user || user.role !== 'owner') {
@@ -60,10 +75,39 @@ const OwnerDashboard = () => {
                     <h1>Gym Admin Panel</h1>
                     <p>Logged in as: <strong>{user.name}</strong></p>
                 </div>
-                <div className="stats-badge">
-                    <span className="stats-count">{members.length}</span>
-                    <span className="stats-label">Total Members</span>
+                
+                {/* STATS DISPLAY */}
+                <div className="stats-container">
+                    <div className="stat-box">
+                        <span className="stat-icon">👥</span>
+                        <div className="stat-content">
+                            <span className="stat-label">Total Members</span>
+                            <span className="stat-value">{stats.total}</span>
+                        </div>
+                    </div>
+                    <div className="stat-box">
+                        <span className="stat-icon">✓</span>
+                        <div className="stat-content">
+                            <span className="stat-label">Active</span>
+                            <span className="stat-value">{stats.active}</span>
+                        </div>
+                    </div>
+                    <div className="stat-box">
+                        <span className="stat-icon">⚠️</span>
+                        <div className="stat-content">
+                            <span className="stat-label">Expired</span>
+                            <span className="stat-value">{stats.expired}</span>
+                        </div>
+                    </div>
+                    <div className="stat-box revenue">
+                        <span className="stat-icon">💰</span>
+                        <div className="stat-content">
+                                <span className="stat-label">Revenue</span>
+                                <span className="stat-value">₹{new Intl.NumberFormat('en-IN').format(stats.revenue)}</span>
+                            </div>
+                    </div>
                 </div>
+                
                 <button className="refresh-btn" onClick={fetchMemberData} disabled={loading}>
                     {loading ? 'Loading...' : '🔄 Refresh'}
                 </button>
@@ -77,17 +121,9 @@ const OwnerDashboard = () => {
 
                     {members.length === 0 ? (
                         <div className="empty-state">
-                            <div className="empty-icon-wrapper">
-                                <span className="empty-icon">🏋️‍♂️</span>
-                            </div>
+                            <div className="empty-icon">🏋️</div>
                             <h3>No Active Members Yet</h3>
-                            <p>
-                                Your dashboard is ready! Once you uncomment the fetching logic 
-                                and connect your backend, member data will appear here.
-                            </p>
-                            <button className="refresh-btn">
-                                Refresh Data
-                            </button>
+                            <p>Your dashboard is ready! Once members register, they will appear here.</p>
                         </div>
                     ) : (
                         <div className="table-wrapper">
@@ -100,6 +136,7 @@ const OwnerDashboard = () => {
                                         <th>Start Date</th>
                                         <th>End Date</th>
                                         <th>Status</th>
+                                        <th>Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -107,14 +144,15 @@ const OwnerDashboard = () => {
                                         <tr key={i}>
                                             <td>{member.firstName} {member.lastName}</td>
                                             <td>{member.phone}</td>
-                                            <td>{member.subscription.title}</td>
-                                            <td>{new Date(member.subscription.startDate).toLocaleDateString()}</td>
-                                            <td>{new Date(member.subscription.endDate).toLocaleDateString()}</td>
+                                            <td>{member.subscription?.title || 'N/A'}</td>
+                                            <td>{member.subscription?.startDate ? new Date(member.subscription.startDate).toLocaleDateString() : 'N/A'}</td>
+                                            <td>{member.subscription?.endDate ? new Date(member.subscription.endDate).toLocaleDateString() : 'N/A'}</td>
                                             <td>
-                                                <span className={`status-badge ${member.subscription.status}`}>
-                                                    {member.subscription.status}
+                                                <span className={`status-badge ${member.subscription?.status || 'inactive'}`}>
+                                                    {member.subscription?.status || 'Inactive'}
                                                 </span>
                                             </td>
+                                            <td className="amount-text">{typeof member.subscription?.price === 'string' ? member.subscription.price : `₹${member.subscription?.price || 0}`}</td>
                                         </tr>
                                     ))}
                                 </tbody>
