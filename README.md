@@ -22,3 +22,29 @@ This platform enables gym owners to manage members, subscriptions, track attenda
 - 💰 Payment & Subscription Monitoring
 - 🚨 Subscription Expiry Management
 - 📋 Member Reports
+
+
+## 🛠️ Tech Stack
+
+| Layer | Technologies |
+|-------|---------------|
+| **Frontend** | React 18, React Router, CSS3, LocalStorage |
+| **Backend** | Node.js, Express.js, JWT, bcryptjs |
+| **Database** | JSON Files (Node.js fs module) |
+| **Authentication** | JWT Tokens |
+| **Styling** | Custom CSS, Gradients, Animations |
+| **State Management** | React Context API |
+
+## 🚀 Installation & Setup
+
+### Prerequisites
+- Node.js (v14+)
+- npm or yarn
+- Git
+
+### Backend Setup
+```bash
+cd "gym management system/backend"
+npm install
+node server.js
+# Server runs on http://localhost:5000
