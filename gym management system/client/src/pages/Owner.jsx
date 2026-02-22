@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 // import axios from 'axios'; // Uncomment this when you are ready to fetch data
 import { useAuth } from '../context/AuthContext'; 
 import './owner.css';
@@ -6,30 +6,40 @@ import './owner.css';
 const OwnerDashboard = () => {
     const { user, token } = useAuth();
     const [members, setMembers] = useState([]);
-    const [loading, setLoading] = useState(false); // Set to false for now
+    const [loading, setLoading] = useState(false);
 
-    /* // --- START: FETCHING LOGIC (UNCOMMENT AFTER BACKEND IS READY) ---
-    useEffect(() => {
-        if (user && user.role === 'owner') {
-            fetchMemberData();
-        }
-    }, [user]);
-
-    const fetchMemberData = async () => {
+    // --- START: FETCHING LOGIC ---
+    const fetchMemberData = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await axios.get('http://localhost:5000/api/owner/members', {
+            console.log('Fetching member data with token:', token);
+            const response = await fetch('http://localhost:5000/api/owner/members', {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setMembers(response.data);
+            const data = await response.json();
+            console.log('API Response:', data);
+            if (data.success) {
+                setMembers(data.members);
+            } else {
+                console.error('API Error:', data.message);
+            }
         } catch (error) {
             console.error("Error loading gym data:", error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [token]);
+
+    useEffect(() => {
+        if (user && user.role === 'owner' && token) {
+            fetchMemberData();
+            
+            // Auto-refresh every 30 seconds
+            const interval = setInterval(fetchMemberData, 30000);
+            return () => clearInterval(interval);
+        }
+    }, [user, token, fetchMemberData]);
     // --- END: FETCHING LOGIC ---
-    */
 
     // Security Check
     if (!user || user.role !== 'owner') {
@@ -54,6 +64,9 @@ const OwnerDashboard = () => {
                     <span className="stats-count">{members.length}</span>
                     <span className="stats-label">Total Members</span>
                 </div>
+                <button className="refresh-btn" onClick={fetchMemberData} disabled={loading}>
+                    {loading ? 'Loading...' : '🔄 Refresh'}
+                </button>
             </header>
 
             <main className="owner-main">
@@ -84,16 +97,24 @@ const OwnerDashboard = () => {
                                         <th>Name</th>
                                         <th>Phone</th>
                                         <th>Plan</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {members.map((m, i) => (
+                                    {members.map((member, i) => (
                                         <tr key={i}>
-                                            <td>{m.name}</td>
-                                            <td>{m.phone}</td>
-                                            <td>{m.plan}</td>
-                                            <td>{m.status}</td>
+                                            <td>{member.firstName} {member.lastName}</td>
+                                            <td>{member.phone}</td>
+                                            <td>{member.subscription.title}</td>
+                                            <td>{new Date(member.subscription.startDate).toLocaleDateString()}</td>
+                                            <td>{new Date(member.subscription.endDate).toLocaleDateString()}</td>
+                                            <td>
+                                                <span className={`status-badge ${member.subscription.status}`}>
+                                                    {member.subscription.status}
+                                                </span>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>

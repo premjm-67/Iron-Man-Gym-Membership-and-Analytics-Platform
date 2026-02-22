@@ -9,10 +9,10 @@ export default function Members() {
   const [compareNotes, setCompareNotes] = useState([]);
   const navigate = useNavigate();
 
-  const membership = user?.membership || user?.plan || null;
+  const membership = user?.subscription;
   const memberName = user?.firstName || "Member";
   const initials = memberName.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase();
-  const isActive = !!membership;
+  const isActive = !!membership && membership.status === 'active';
 
   const plans = [
     {
@@ -82,7 +82,7 @@ export default function Members() {
 
         <div className="plans-container">
           {plans.map((plan) => {
-            const isOwned = membership && (membership.id === plan.id || membership.title === plan.title);
+            const isOwned = membership && membership.id === plan.id;
             
             return (
               <article 

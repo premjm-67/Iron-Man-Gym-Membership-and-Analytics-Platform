@@ -1,43 +1,259 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./members.css";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 
 export default function Payments() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const location = useLocation();
+  const { user, updateProfile } = useAuth();
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  // Get plan from navigation state
+  const selectedPlan = location.state?.plan;
 
   useEffect(() => {
     // Simulate fetching payment history
     setTimeout(() => {
-      const mockPayments = [
+      const mockPayments = user?.subscription ? [
         {
-          id: "PAY-001",
-          date: "2025-12-15",
-          plan: "6 Months",
-          amount: "₹6,999",
+          id: `PAY-${Date.now()}`,
+          date: new Date().toISOString().split('T')[0],
+          plan: user.subscription.title || "Membership",
+          amount: user.subscription.price || "₹0",
           status: "Completed",
           method: "Credit Card",
-        },
-        {
-          id: "PAY-002",
-          date: "2025-11-10",
-          plan: "3 Months",
-          amount: "₹3,999",
-          status: "Completed",
-          method: "UPI",
-        },
-      ];
+        }
+      ] : [];
       
-      // For demo: only show if user has a subscription
-      if (user?.membership || user?.plan) {
-        setPayments(mockPayments);
-      }
+      setPayments(mockPayments);
       setLoading(false);
     }, 500);
   }, [user]);
+
+  const handlePayment = async () => {
+    if (!selectedPlan) return;
+
+    setProcessingPayment(true);
+
+    try {
+      // Simulate payment processing
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Calculate subscription dates
+      const startDate = new Date();
+      const endDate = new Date();
+      
+      // Add months based on plan
+      const months = selectedPlan.id === '3m' ? 3 : 
+                    selectedPlan.id === '6m' ? 6 : 
+                    selectedPlan.id === '9m' ? 9 : 12;
+      endDate.setMonth(endDate.getMonth() + months);
+
+      const subscriptionData = {
+        id: selectedPlan.id,
+        title: selectedPlan.title,
+        price: selectedPlan.price,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        status: 'active',
+        paymentId: `PAY-${Date.now()}`,
+        paymentDate: new Date().toISOString()
+      };
+
+      // Update user profile with subscription
+      const success = await updateProfile({ subscription: subscriptionData });
+      
+      if (success) {
+        setPaymentSuccess(true);
+        // Refresh payment history
+        setPayments([{
+          id: subscriptionData.paymentId,
+          date: subscriptionData.paymentDate.split('T')[0],
+          plan: subscriptionData.title,
+          amount: subscriptionData.price,
+          status: "Completed",
+          method: "Credit Card",
+        }]);
+        
+        // Redirect to dashboard after success
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Payment failed:', error);
+      alert('Payment failed. Please try again.');
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
+
+  if (paymentSuccess) {
+    return (
+      <div className="page-wrapper">
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '80vh',
+          textAlign: 'center'
+        }}>
+          <div style={{
+            width: '100px',
+            height: '100px',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '24px',
+            fontSize: '48px'
+          }}>
+            ✓
+          </div>
+          <h1 style={{ color: '#059669', marginBottom: '16px' }}>Payment Successful!</h1>
+          <p style={{ fontSize: '18px', marginBottom: '32px' }}>
+            Your {selectedPlan?.title} membership is now active.
+          </p>
+          <p style={{ color: '#6b7280' }}>
+            Redirecting to dashboard...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (selectedPlan) {
+    return (
+      <div className="page-wrapper">
+        <header className="site-header">
+          <div className="brand">IRON MAN FITNESS</div>
+          <div className="nav">
+            <button className="btn ghost" onClick={() => navigate("/dashboard")}>Dashboard</button>
+            <button className="btn ghost" onClick={() => navigate("/members")}>Back to Plans</button>
+          </div>
+        </header>
+
+        <main className="payments-page">
+          <section style={{ padding: "40px 0" }}>
+            <div style={{ maxWidth: "600px", margin: "0 auto" }}>
+              <h1 style={{ textAlign: "center", marginBottom: "32px" }}>
+                Complete Your Payment
+              </h1>
+
+              <div style={{
+                background: "#f9fafb",
+                borderRadius: "12px",
+                padding: "24px",
+                marginBottom: "24px",
+                border: "1px solid #e5e7eb"
+              }}>
+                <h2 style={{ marginBottom: "16px" }}>{selectedPlan.title}</h2>
+                <p style={{ color: "#6b7280", marginBottom: "8px" }}>{selectedPlan.desc}</p>
+                <div style={{ fontSize: "24px", fontWeight: "bold", color: "#ef4444" }}>
+                  {selectedPlan.price}
+                </div>
+              </div>
+
+              <div style={{
+                background: "#fff",
+                borderRadius: "12px",
+                padding: "24px",
+                border: "1px solid #e5e7eb"
+              }}>
+                <h3 style={{ marginBottom: "16px" }}>Payment Details</h3>
+                
+                <div style={{ marginBottom: "16px" }}>
+                  <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>
+                    Card Number
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="1234 5678 9012 3456"
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      border: "1px solid #d1d5db",
+                      borderRadius: "6px",
+                      fontSize: "16px"
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: "flex", gap: "16px", marginBottom: "16px" }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>
+                      Expiry Date
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="MM/YY"
+                      style={{
+                        width: "100%",
+                        padding: "12px",
+                        border: "1px solid #d1d5db",
+                        borderRadius: "6px",
+                        fontSize: "16px"
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>
+                      CVV
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="123"
+                      style={{
+                        width: "100%",
+                        padding: "12px",
+                        border: "1px solid #d1d5db",
+                        borderRadius: "6px",
+                        fontSize: "16px"
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  onClick={handlePayment}
+                  disabled={processingPayment}
+                  style={{
+                    width: "100%",
+                    background: processingPayment ? "#6b7280" : "linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)",
+                    color: "#fff",
+                    border: "none",
+                    padding: "16px",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    cursor: processingPayment ? "not-allowed" : "pointer",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  {processingPayment ? "Processing Payment..." : `Pay ${selectedPlan.price}`}
+                </button>
+
+                <p style={{
+                  textAlign: "center",
+                  fontSize: "12px",
+                  color: "#6b7280",
+                  marginTop: "16px"
+                }}>
+                  This is a simulated payment for demonstration purposes.
+                </p>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="page-wrapper">

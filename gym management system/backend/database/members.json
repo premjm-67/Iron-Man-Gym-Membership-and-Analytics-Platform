@@ -34,5 +34,38 @@
     "subscription": null,
     "attendance": [],
     "createdAt": "2026-02-09T11:09:57.861Z"
+  },
+  {
+    "id": 1771749913123,
+    "firstName": "Calvin",
+    "lastName": "S",
+    "age": "20",
+    "dob": "2006-02-22",
+    "phone": "1231231231",
+    "passwordHash": "$2a$10$FfWdmPKFXCBUtK3UO0FSfeuxq.cAQ/C3X1zwvfk/qCyEYvPEhqvcu",
+    "subscription": {
+      "id": "3m",
+      "title": "Starter",
+      "price": "₹3,999",
+      "startDate": "2026-02-22T08:45:36.250Z",
+      "endDate": "2026-05-22T08:45:36.250Z",
+      "status": "active",
+      "paymentId": "PAY-1771749936253",
+      "paymentDate": "2026-02-22T08:45:36.253Z"
+    },
+    "attendance": [],
+    "createdAt": "2026-02-22T08:45:13.123Z"
+  },
+  {
+    "id": 1771758909698,
+    "firstName": "Tamil",
+    "lastName": "k",
+    "age": "20",
+    "dob": "2006-02-03",
+    "phone": "1234123412",
+    "passwordHash": "$2a$10$MGk9AjfYDZlG3ZyMfGm2QOW.xM0YDEJeHcWe2koTYshKt1QU/pUOC",
+    "subscription": null,
+    "attendance": [],
+    "createdAt": "2026-02-22T11:15:09.698Z"
   }
 ]

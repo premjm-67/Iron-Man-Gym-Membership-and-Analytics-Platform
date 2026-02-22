@@ -6,7 +6,7 @@ export default function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const hasMembership = !!(user?.membership && user.membership !== "none" && user.membership !== "");
+  const hasMembership = !!(user?.subscription && user.subscription.status === 'active');
 
   return (
     <div className="dashboard-view">

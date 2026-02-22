@@ -4,6 +4,7 @@ require("dotenv").config();
 
 const memberRoutes = require("./routes/memberRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const ownerRoutes = require("./routes/ownerRoutes");
 const authMiddleware = require("./middleware/authMiddleware");
 
 const app = express();
@@ -15,6 +16,7 @@ app.use(express.json());
 // Routes
 app.use("/api/members", memberRoutes);
 app.use("/api/payments", authMiddleware, paymentRoutes);
+app.use("/api/owner", ownerRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {

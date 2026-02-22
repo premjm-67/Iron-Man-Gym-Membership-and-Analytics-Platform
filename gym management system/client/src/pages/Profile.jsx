@@ -11,7 +11,7 @@ export default function Profile() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const membership = user?.membership || user?.plan || null;
+  const membership = user?.subscription;
   const createdAt = user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "—";
   const initials = (user?.firstName || "M")[0]?.toUpperCase();
 
@@ -164,12 +164,30 @@ export default function Profile() {
         {/* SUBSCRIPTION CARD */}
         <div className="dash-card" style={{ background: "white", padding: "30px", borderRadius: "24px" }}>
           <h2 style={{ fontSize: "18px", fontWeight: 800, marginBottom: "20px" }}>Subscription</h2>
-          <div style={{ background: membership ? "linear-gradient(135deg, #6366f1, #06b6d4)" : "#f1f5f9", padding: "20px", borderRadius: "16px", color: membership ? "white" : "#64748b" }}>
-            <h3 style={{ margin: 0, fontSize: "16px" }}>{membership ? "Active Premium" : "No Plan"}</h3>
-            <p style={{ fontSize: "13px", opacity: 0.8 }}>{membership ? "Unlimited Access" : "Join to start"}</p>
+          <div style={{ background: membership && membership.status === 'active' ? "linear-gradient(135deg, #6366f1, #06b6d4)" : "#f1f5f9", padding: "20px", borderRadius: "16px", color: membership && membership.status === 'active' ? "white" : "#64748b" }}>
+            <h3 style={{ margin: 0, fontSize: "16px" }}>{membership && membership.status === 'active' ? membership.title : "No Active Plan"}</h3>
+            <p style={{ fontSize: "13px", opacity: 0.8 }}>{membership && membership.status === 'active' ? `Valid until ${new Date(membership.endDate).toLocaleDateString()}` : "Join to start your fitness journey"}</p>
           </div>
+          
+          {membership && membership.status === 'active' && (
+            <div style={{ marginTop: "20px", padding: "15px", background: "#f8fafc", borderRadius: "12px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", marginBottom: "8px" }}>
+                <span style={{ color: "#64748b" }}>Plan Price</span>
+                <span style={{ fontWeight: 700 }}>{membership.price}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", marginBottom: "8px" }}>
+                <span style={{ color: "#64748b" }}>Start Date</span>
+                <span style={{ fontWeight: 700 }}>{new Date(membership.startDate).toLocaleDateString()}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
+                <span style={{ color: "#64748b" }}>End Date</span>
+                <span style={{ fontWeight: 700 }}>{new Date(membership.endDate).toLocaleDateString()}</span>
+              </div>
+            </div>
+          )}
+          
           <button onClick={() => navigate("/members")} style={{ width: "100%", marginTop: "20px", background: "none", border: "2px solid #6366f1", color: "#6366f1", padding: "10px", borderRadius: "12px", fontWeight: "700", cursor: "pointer" }}>
-            Change Plan
+            {membership && membership.status === 'active' ? "Change Plan" : "Choose Plan"}
           </button>
           
           <div style={{ marginTop: "25px", borderTop: "1px solid #f1f5f9", paddingTop: "20px" }}>
