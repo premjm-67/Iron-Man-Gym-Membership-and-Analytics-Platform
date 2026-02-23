@@ -4,7 +4,9 @@ const {
   registerMember,
   loginMember,
   getMe,
-  updateMe
+  updateMe,
+  getAttendance,
+  markAttendance
 } = require("../controllers/memberController");
 const auth = require('../middleware/authMiddleware');
 
@@ -14,5 +16,7 @@ router.post("/login", loginMember);
 // protected
 router.get('/me', auth, getMe);
 router.put('/me', auth, updateMe);
+router.get('/attendance', auth, getAttendance);
+router.post('/attendance', auth, markAttendance);
 
 module.exports = router;

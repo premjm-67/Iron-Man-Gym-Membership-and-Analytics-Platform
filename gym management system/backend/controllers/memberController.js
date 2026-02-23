@@ -165,8 +165,29 @@ exports.getMe = (req, res) => {
     }
   }
 
+  // Get additional dynamic data from subscriptions.json
+  let subscriptionData = null;
+  try {
+    const subscriptionsPath = path.join(__dirname, "../database/subscriptions.json");
+    if (fs.existsSync(subscriptionsPath)) {
+      const subscriptions = JSON.parse(fs.readFileSync(subscriptionsPath, 'utf8'));
+      subscriptionData = subscriptions.find(s => s.memberId === member.id);
+    }
+  } catch (error) {
+    console.error('Error reading subscriptions.json:', error);
+  }
+
   const safeMember = { ...member };
   delete safeMember.passwordHash;
+
+  // Add dynamic data from subscriptions.json
+  if (subscriptionData) {
+    safeMember.subscriptionData = {
+      lastAttendance: subscriptionData.lastAttendance,
+      attendanceStreak: subscriptionData.attendanceStreak || 0,
+      memberName: subscriptionData.memberName
+    };
+  }
 
   return res.json({ success: true, member: safeMember });
 };
@@ -197,4 +218,123 @@ exports.updateMe = (req, res) => {
   delete safeMember.passwordHash;
 
   return res.json({ success: true, member: safeMember });
+};
+
+// ================= GET ATTENDANCE (protected) =================
+exports.getAttendance = (req, res) => {
+  const members = readMembers();
+  const member = members.find((m) => m.id === req.user.id || m.phone === req.user.phone);
+
+  if (!member) {
+    return res.status(404).json({ success: false, message: 'Member not found' });
+  }
+
+  return res.json({ success: true, attendance: member.attendance || [] });
+};
+
+// ================= MARK ATTENDANCE (protected) =================
+exports.markAttendance = (req, res) => {
+  const { date, dates } = req.body;
+  if (!date && !dates) {
+    return res.status(400).json({ success: false, message: 'Date or dates array is required' });
+  }
+
+  const members = readMembers();
+  const idx = members.findIndex((m) => m.id === req.user.id || m.phone === req.user.phone);
+
+  if (idx === -1) {
+    return res.status(404).json({ success: false, message: 'Member not found' });
+  }
+
+  const member = members[idx];
+  if (!member.attendance) member.attendance = [];
+
+  let attendanceDates = member.attendance;
+
+  if (dates) {
+    // Bulk update - replace attendance array
+    attendanceDates = [...new Set(dates)].sort();
+    member.attendance = attendanceDates;
+  } else {
+    // Single date update
+    if (!member.attendance.includes(date)) {
+      member.attendance.push(date);
+      member.attendance.sort();
+      attendanceDates = member.attendance;
+    }
+  }
+
+  members[idx] = member;
+  fs.writeFileSync(filePath, JSON.stringify(members, null, 2));
+
+  // Update subscriptions.json with dynamic attendance data
+  try {
+    const subscriptionsPath = path.join(__dirname, "../database/subscriptions.json");
+    if (fs.existsSync(subscriptionsPath)) {
+      const subscriptions = JSON.parse(fs.readFileSync(subscriptionsPath, 'utf8'));
+      const subIndex = subscriptions.findIndex(s => s.memberId === member.id);
+
+      if (subIndex !== -1) {
+        const subscription = subscriptions[subIndex];
+
+        // Update last attendance
+        const latestDate = attendanceDates[attendanceDates.length - 1];
+        subscription.lastAttendance = latestDate;
+
+        // Calculate attendance streak
+        if (attendanceDates.length > 0) {
+          let streak = 1;
+          const sortedDates = attendanceDates.sort();
+          const today = (() => {
+            const d = new Date();
+            return d.getFullYear() + '-' + 
+                   String(d.getMonth() + 1).padStart(2, '0') + '-' + 
+                   String(d.getDate()).padStart(2, '0');
+          })();
+
+          // Check consecutive days from today backwards
+          for (let i = sortedDates.length - 1; i > 0; i--) {
+            const currentDate = new Date(sortedDates[i]);
+            const prevDate = new Date(sortedDates[i - 1]);
+            const diffTime = currentDate - prevDate;
+            const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+            if (diffDays === 1) {
+              streak++;
+            } else {
+              break;
+            }
+          }
+
+          // Check if today is attended for current streak
+          if (sortedDates.includes(today)) {
+            subscription.attendanceStreak = streak;
+          } else {
+            // Check if yesterday was attended
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = (() => {
+              return yesterday.getFullYear() + '-' + 
+                     String(yesterday.getMonth() + 1).padStart(2, '0') + '-' + 
+                     String(yesterday.getDate()).padStart(2, '0');
+            })();
+
+            if (sortedDates.includes(yesterdayStr)) {
+              subscription.attendanceStreak = streak;
+            } else {
+              subscription.attendanceStreak = 0;
+            }
+          }
+        } else {
+          subscription.attendanceStreak = 0;
+        }
+
+        fs.writeFileSync(subscriptionsPath, JSON.stringify(subscriptions, null, 2));
+      }
+    }
+  } catch (error) {
+    console.error('Error updating subscriptions.json with attendance data:', error);
+  }
+
+  return res.json({ success: true, attendance: member.attendance });
 };
