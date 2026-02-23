@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../context/AuthContext'; 
+import { useAuth } from '../context/AuthContext';
 import './owner.css';
 
 const OwnerDashboard = () => {
-    const { user, token } = useAuth();
+    const { user, token, logout } = useAuth();
     const [members, setMembers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [stats, setStats] = useState({ total: 0, active: 0, expired: 0, revenue: 0 });
@@ -18,7 +18,7 @@ const OwnerDashboard = () => {
             const data = await response.json();
             if (data.success) {
                 setMembers(data.members);
-                
+
                 // Calculate stats
                 const activeMembers = data.members.filter(m => m.subscription?.status === 'active').length;
                 const expiredMembers = data.members.filter(m => m.subscription?.status === 'expired').length;
@@ -69,54 +69,56 @@ const OwnerDashboard = () => {
     if (loading) return <div className="loading-spinner">Loading Gym Records...</div>;
 
     return (
-        <div className="owner-container">
-            <header className="owner-header">
-                <div className="owner-welcome">
-                    <h1>Gym Admin Panel</h1>
-                    <p>Logged in as: <strong>{user.name}</strong></p>
+        <div className="owner-view">
+            <nav className="trainer-nav">
+                <div className="nav-left">
+                    <span className="user-name">Owner Panel</span>
                 </div>
-                
-                {/* STATS DISPLAY */}
-                <div className="stats-container">
-                    <div className="stat-box">
-                        <span className="stat-icon">👥</span>
-                        <div className="stat-content">
-                            <span className="stat-label">Total Members</span>
-                            <span className="stat-value">{stats.total}</span>
-                        </div>
-                    </div>
-                    <div className="stat-box">
-                        <span className="stat-icon">✓</span>
-                        <div className="stat-content">
-                            <span className="stat-label">Active</span>
-                            <span className="stat-value">{stats.active}</span>
-                        </div>
-                    </div>
-                    <div className="stat-box">
-                        <span className="stat-icon">⚠️</span>
-                        <div className="stat-content">
-                            <span className="stat-label">Expired</span>
-                            <span className="stat-value">{stats.expired}</span>
-                        </div>
-                    </div>
-                    <div className="stat-box revenue">
-                        <span className="stat-icon">💰</span>
-                        <div className="stat-content">
-                                <span className="stat-label">Revenue</span>
-                                <span className="stat-value">₹{new Intl.NumberFormat('en-IN').format(stats.revenue)}</span>
-                            </div>
-                    </div>
+                <div className="nav-center">IRON MAN FITNESS STUDIO</div>
+                <div className="nav-right">
+                    <button className="logout-btn" onClick={logout}>Logout</button>
                 </div>
-                
-                <button className="refresh-btn" onClick={fetchMemberData} disabled={loading}>
-                    {loading ? 'Loading...' : '🔄 Refresh'}
-                </button>
+            </nav>
+
+            <header className="hero-compact">
+                <h1>Gym <span className="text-gradient">Admin Panel</span></h1>
+                <p>Monitor your gym's performance and member activity</p>
             </header>
 
-            <main className="owner-main">
+            <main className="trainers-grid-small">
+                <StatCard
+                    title="Total Members"
+                    value={stats.total}
+                    icon="👥"
+                    color="#4f46e5"
+                />
+                <StatCard
+                    title="Active Members"
+                    value={stats.active}
+                    icon="✓"
+                    color="#10b981"
+                />
+                <StatCard
+                    title="Expired Members"
+                    value={stats.expired}
+                    icon="⚠️"
+                    color="#f59e0b"
+                />
+                <StatCard
+                    title="Total Revenue"
+                    value={`₹${new Intl.NumberFormat('en-IN').format(stats.revenue)}`}
+                    icon="💰"
+                    color="#ef4444"
+                />
+            </main>
+
+            <div className="owner-main">
                 <div className="data-card">
                     <div className="card-header">
                         <h2>Member Directory</h2>
+                        <button className="refresh-btn" onClick={fetchMemberData} disabled={loading}>
+                            {loading ? 'Loading...' : '🔄 Refresh'}
+                        </button>
                     </div>
 
                     {members.length === 0 ? (
@@ -160,9 +162,33 @@ const OwnerDashboard = () => {
                         </div>
                     )}
                 </div>
-            </main>
+            </div>
+
+            <footer className="mini-footer-branded">
+                <p>IRON MAN FITNESS STUDIO • ADMIN PANEL</p>
+            </footer>
         </div>
     );
 };
+
+function StatCard({ title, value, icon, color }) {
+    return (
+        <div className="trainer-mini-card">
+            <div className="mini-card-top">
+                <span className="mini-spec" style={{ background: `linear-gradient(90deg, ${color}, ${color}dd)` }}>
+                    {title.toUpperCase()}
+                </span>
+                <div style={{ fontSize: '32px', margin: '10px 0' }}>{icon}</div>
+            </div>
+
+            <div className="mini-card-meta">
+                <div className="meta-row">
+                    <span className="label">Current:</span>
+                    <span className="value">{value}</span>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default OwnerDashboard;
