@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import "./dashboard.css";
+import "./dashboard.saas.css";
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -10,8 +10,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-view">
-      {/* NAVIGATION - Using your structure with premium red accents */}
-      <nav className="dash-nav">
+      <nav className="trainer-nav">
         <div className="nav-left">
           Welcome, <span className="user-name">{user?.firstName || "Member"}</span>
         </div>
@@ -21,8 +20,7 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      {/* HERO STATUS */}
-      <header className="dash-hero">
+      <header className="hero-compact">
         <h1>Member <span className="text-gradient">Dashboard</span></h1>
         <div className="status-container">
           {hasMembership ? (
@@ -36,48 +34,46 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* GRID SECTION */}
-      <main className="dash-grid">
-        <Card 
-          title="Membership" 
-          desc="Plans & validity" 
+      <main className="trainers-grid-small">
+        <Card
+          title="Membership"
+          desc="Plans & validity"
           icon="🎫"
-          color="#ef4444" /* Red */
-          onClick={() => navigate("/members")} 
+          color="#4f46e5"
+          onClick={() => navigate("/members")}
         />
-        <Card 
-          title="Trainers" 
-          desc="Personal coaches" 
+        <Card
+          title="Trainers"
+          desc="Personal coaches"
           icon="💪"
-          color="#0f172a" /* Dark Slate */
-          onClick={() => navigate("/trainers")} 
+          color="#06b6d4"
+          onClick={() => navigate("/trainers")}
         />
-        <Card 
-          title="Attendance" 
-          desc="Visit history" 
+        <Card
+          title="Attendance"
+          desc="Visit history"
           icon="📅"
-          color="#b91c1c" /* Deep Red */
-          locked={!hasMembership} 
-          onClick={() => navigate("/attendance")} 
+          color="#10b981"
+          locked={!hasMembership}
+          onClick={() => navigate("/attendance")}
         />
-        <Card 
-          title="Payments" 
-          desc="Invoices & bills" 
+        <Card
+          title="Payments"
+          desc="Invoices & bills"
           icon="💳"
-          color="#334155" /* Muted Slate */
-          onClick={() => navigate("/payments")} 
+          color="#f59e0b"
+          onClick={() => navigate("/payments")}
         />
-        <Card 
-          title="Profile" 
-          desc="Account settings" 
+        <Card
+          title="Profile"
+          desc="Account settings"
           icon="⚙️"
-          color="#ef4444" /* Red */
-          onClick={() => navigate("/profile")} 
+          color="#ef4444"
+          onClick={() => navigate("/profile")}
         />
       </main>
 
-      {/* FOOTER */}
-      <footer className="dash-footer-branded">
+      <footer className="mini-footer-branded">
         <p>IRON MAN FITNESS STUDIO • GLOBAL PERFORMANCE LABS</p>
       </footer>
     </div>
@@ -86,23 +82,31 @@ export default function Dashboard() {
 
 function Card({ title, desc, icon, color, locked, onClick }) {
   return (
-    <div 
-      className={`dash-card ${locked ? "locked-card" : ""}`}
+    <div
+      className={`trainer-mini-card ${locked ? "locked-card" : ""}`}
       onClick={!locked ? onClick : undefined}
       style={{ "--accent": color }}
     >
-      <div className="card-top">
-        <span className="card-icon-box">{icon}</span>
-        {locked ? <span className="lock-tag">🔒 Locked</span> : <span className="active-dot">●</span>}
-      </div>
-      <div className="card-body">
+      <div className="mini-card-top">
+        <span className="mini-spec" style={{ background: `linear-gradient(90deg, ${color}, ${color}dd)` }}>
+          {locked ? "LOCKED" : "ACTIVE"}
+        </span>
         <h3>{title}</h3>
-        <p>{desc}</p>
       </div>
-      <div className="card-footer-action">
-        <span>{locked ? "Upgrade to View" : "Enter Section"}</span>
-        <span className="arrow">→</span>
+
+      <div className="mini-card-meta">
+        <div className="meta-row">
+          <span className="label">Feature:</span>
+          <span className="value">{desc}</span>
+        </div>
+        <div className="meta-row">
+          <span className="label">Status:</span>
+          <span className="value">{locked ? "Upgrade Required" : "Available"}</span>
+        </div>
+      </div>
+      <div className="mini-footer">
+        {locked ? "Upgrade to Access →" : "Enter Section →"}
       </div>
     </div>
   );
-}
+}   
