@@ -53,7 +53,10 @@
       "paymentId": "PAY-1771749936253",
       "paymentDate": "2026-02-22T08:45:36.253Z"
     },
-    "attendance": [],
+    "attendance": [
+      "2026-02-22",
+      "2026-02-23"
+    ],
     "createdAt": "2026-02-22T08:45:13.123Z"
   },
   {
@@ -67,5 +70,28 @@
     "subscription": null,
     "attendance": [],
     "createdAt": "2026-02-22T11:15:09.698Z"
+  },
+  {
+    "id": 1771863571570,
+    "firstName": "Karthi",
+    "lastName": "S",
+    "age": "20",
+    "dob": "2006-02-04",
+    "phone": "1231231232",
+    "passwordHash": "$2a$10$4DZvFwU2t0eeHjuCjbER8OcvjuWCqJCfKiej4JM3RRhu/Kg8L0QcW",
+    "subscription": {
+      "id": "6m",
+      "title": "Pro",
+      "price": "₹6,999",
+      "startDate": "2026-02-23T16:19:55.045Z",
+      "endDate": "2026-08-23T16:19:55.045Z",
+      "status": "active",
+      "paymentId": "PAY-1771863595047",
+      "paymentDate": "2026-02-23T16:19:55.047Z"
+    },
+    "attendance": [
+      "2026-02-23"
+    ],
+    "createdAt": "2026-02-23T16:19:31.570Z"
   }
 ]
