@@ -12,8 +12,8 @@
     "paymentId": "pay_1739999999999",
     "paymentDate": "2026-02-22T08:45:36.250Z",
     "duration": 3,
-    "lastAttendance": "2026-02-23",
-    "attendanceStreak": 2
+    "lastAttendance": "2026-02-24",
+    "attendanceStreak": 3
   },
   {
     "memberId": 1771863571570,
@@ -28,7 +28,7 @@
     "paymentId": "PAY-1771863595047",
     "paymentDate": "2026-02-23T16:19:55.047Z",
     "duration": 6,
-    "lastAttendance": "2026-02-23",
-    "attendanceStreak": 1
+    "lastAttendance": "2026-02-24",
+    "attendanceStreak": 2
   }
 ]

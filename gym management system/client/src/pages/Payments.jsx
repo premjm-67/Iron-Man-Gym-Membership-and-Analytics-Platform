@@ -12,11 +12,9 @@ export default function Payments() {
   const [processingPayment, setProcessingPayment] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
-  // Get plan from navigation state
   const selectedPlan = location.state?.plan;
 
   useEffect(() => {
-    // Simulate fetching payment history
     setTimeout(() => {
       const mockPayments = user?.subscription ? [
         {
@@ -28,7 +26,6 @@ export default function Payments() {
           method: "Credit Card",
         }
       ] : [];
-      
       setPayments(mockPayments);
       setLoading(false);
     }, 500);
@@ -36,18 +33,11 @@ export default function Payments() {
 
   const handlePayment = async () => {
     if (!selectedPlan) return;
-
     setProcessingPayment(true);
-
     try {
-      // Simulate payment processing
       await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Calculate subscription dates
       const startDate = new Date();
       const endDate = new Date();
-      
-      // Add months based on plan
       const months = selectedPlan.id === '3m' ? 3 : 
                     selectedPlan.id === '6m' ? 6 : 
                     selectedPlan.id === '9m' ? 9 : 12;
@@ -64,12 +54,9 @@ export default function Payments() {
         paymentDate: new Date().toISOString()
       };
 
-      // Update user profile with subscription
       const success = await updateProfile({ subscription: subscriptionData });
-      
       if (success) {
         setPaymentSuccess(true);
-        // Refresh payment history
         setPayments([{
           id: subscriptionData.paymentId,
           date: subscriptionData.paymentDate.split('T')[0],
@@ -78,11 +65,7 @@ export default function Payments() {
           status: "Completed",
           method: "Credit Card",
         }]);
-        
-        // Redirect to dashboard after success
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 2000);
+        setTimeout(() => { navigate("/dashboard"); }, 2000);
       }
     } catch (error) {
       console.error('Payment failed:', error);
@@ -92,375 +75,182 @@ export default function Payments() {
     }
   };
 
+  // SUCCESS STATE UI
   if (paymentSuccess) {
     return (
-      <div className="page-wrapper">
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '80vh',
-          textAlign: 'center'
+      <div className="page-wrapper" style={{ background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div className="success-card" style={{
+          background: 'white', padding: '48px', borderRadius: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
+          textAlign: 'center', maxWidth: '450px', width: '90%'
         }}>
           <div style={{
-            width: '100px',
-            height: '100px',
-            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '24px',
-            fontSize: '48px'
-          }}>
-            ✓
+            width: '80px', height: '80px', background: '#10b981', borderRadius: '50%', color: 'white',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', fontSize: '40px'
+          }}>✓</div>
+          <h1 style={{ color: '#1e293b', fontSize: '28px', marginBottom: '12px' }}>Payment Confirmed!</h1>
+          <p style={{ color: '#64748b', lineHeight: '1.6', marginBottom: '32px' }}>
+            Welcome to the team! Your <strong>{selectedPlan?.title}</strong> is now active.
+          </p>
+          <div className="loader-bar" style={{ width: '100%', height: '4px', background: '#f1f5f9', borderRadius: '2px', overflow: 'hidden' }}>
+            <div style={{ width: '40%', height: '100%', background: '#10b981', animation: 'load 2s infinite ease-in-out' }}></div>
           </div>
-          <h1 style={{ color: '#059669', marginBottom: '16px' }}>Payment Successful!</h1>
-          <p style={{ fontSize: '18px', marginBottom: '32px' }}>
-            Your {selectedPlan?.title} membership is now active.
-          </p>
-          <p style={{ color: '#6b7280' }}>
-            Redirecting to dashboard...
-          </p>
+          <p style={{ marginTop: '16px', fontSize: '14px', color: '#94a3b8' }}>Redirecting to your dashboard...</p>
         </div>
       </div>
     );
   }
 
+  // PAYMENT FORM UI
   if (selectedPlan) {
     return (
-      <div className="page-wrapper">
-        <header className="site-header">
-          <div className="brand">IRON MAN FITNESS</div>
+      <div className="page-wrapper" style={{ background: '#f1f5f9', minHeight: '100vh' }}>
+        <header className="site-header" style={{ background: 'white', borderBottom: '1px solid #e2e8f0' }}>
+          <div className="brand" style={{ fontWeight: '800', letterSpacing: '-1px' }}>IRON MAN FITNESS</div>
           <div className="nav">
-            <button className="btn ghost" onClick={() => navigate("/dashboard")}>Dashboard</button>
-            <button className="btn ghost" onClick={() => navigate("/members")}>Back to Plans</button>
+            <button className="btn ghost" onClick={() => navigate("/members")}>Cancel</button>
           </div>
         </header>
 
-        <main className="payments-page">
-          <section style={{ padding: "40px 0" }}>
-            <div style={{ maxWidth: "600px", margin: "0 auto" }}>
-              <h1 style={{ textAlign: "center", marginBottom: "32px" }}>
-                Complete Your Payment
-              </h1>
-
-              <div style={{
-                background: "#f9fafb",
-                borderRadius: "12px",
-                padding: "24px",
-                marginBottom: "24px",
-                border: "1px solid #e5e7eb"
-              }}>
-                <h2 style={{ marginBottom: "16px" }}>{selectedPlan.title}</h2>
-                <p style={{ color: "#6b7280", marginBottom: "8px" }}>{selectedPlan.desc}</p>
-                <div style={{ fontSize: "24px", fontWeight: "bold", color: "#ef4444" }}>
-                  {selectedPlan.price}
+        <main style={{ maxWidth: '1000px', margin: '40px auto', padding: '0 20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '40px', alignItems: 'start' }}>
+            
+            {/* Left Column: Summary */}
+            <div style={{ position: 'sticky', top: '40px' }}>
+              <h2 style={{ fontSize: '32px', fontWeight: '800', marginBottom: '24px', color: '#1e293b' }}>Checkout</h2>
+              <div style={{ background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)', padding: '32px', borderRadius: '24px', color: 'white', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}>
+                <span style={{ textTransform: 'uppercase', fontSize: '12px', letterSpacing: '2px', opacity: 0.8 }}>Selected Plan</span>
+                <h3 style={{ fontSize: '24px', margin: '8px 0' }}>{selectedPlan.title}</h3>
+                <p style={{ opacity: 0.7, fontSize: '14px', marginBottom: '24px' }}>{selectedPlan.desc}</p>
+                <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', marginBottom: '24px' }}></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '18px' }}>Total Amount</span>
+                  <span style={{ fontSize: '28px', fontWeight: '700', color: '#fbbf24' }}>{selectedPlan.price}</span>
                 </div>
               </div>
-
-              <div style={{
-                background: "#fff",
-                borderRadius: "12px",
-                padding: "24px",
-                border: "1px solid #e5e7eb"
-              }}>
-                <h3 style={{ marginBottom: "16px" }}>Payment Details</h3>
-                
-                <div style={{ marginBottom: "16px" }}>
-                  <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>
-                    Card Number
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="1234 5678 9012 3456"
-                    style={{
-                      width: "100%",
-                      padding: "12px",
-                      border: "1px solid #d1d5db",
-                      borderRadius: "6px",
-                      fontSize: "16px"
-                    }}
-                  />
-                </div>
-
-                <div style={{ display: "flex", gap: "16px", marginBottom: "16px" }}>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>
-                      Expiry Date
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="MM/YY"
-                      style={{
-                        width: "100%",
-                        padding: "12px",
-                        border: "1px solid #d1d5db",
-                        borderRadius: "6px",
-                        fontSize: "16px"
-                      }}
-                    />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ display: "block", marginBottom: "8px", fontWeight: "500" }}>
-                      CVV
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="123"
-                      style={{
-                        width: "100%",
-                        padding: "12px",
-                        border: "1px solid #d1d5db",
-                        borderRadius: "6px",
-                        fontSize: "16px"
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <button
-                  onClick={handlePayment}
-                  disabled={processingPayment}
-                  style={{
-                    width: "100%",
-                    background: processingPayment ? "#6b7280" : "linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)",
-                    color: "#fff",
-                    border: "none",
-                    padding: "16px",
-                    borderRadius: "8px",
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    cursor: processingPayment ? "not-allowed" : "pointer",
-                    transition: "all 0.2s ease"
-                  }}
-                >
-                  {processingPayment ? "Processing Payment..." : `Pay ${selectedPlan.price}`}
-                </button>
-
-                <p style={{
-                  textAlign: "center",
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  marginTop: "16px"
-                }}>
-                  This is a simulated payment for demonstration purposes.
-                </p>
-              </div>
+              <p style={{ marginTop: '24px', color: '#64748b', fontSize: '14px', textAlign: 'center' }}>
+                🛡️ Secure 256-bit SSL Encrypted Payment
+              </p>
             </div>
-          </section>
+
+            {/* Right Column: Card Form */}
+            <div style={{ background: 'white', padding: '40px', borderRadius: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+              <h3 style={{ marginBottom: '24px', fontSize: '20px', fontWeight: '600' }}>Payment Method</h3>
+              
+              {/* Visual Card representation */}
+              <div style={{ 
+                height: '180px', width: '100%', background: 'linear-gradient(135deg, #ef4444 0%, #991b1b 100%)', 
+                borderRadius: '16px', marginBottom: '32px', padding: '24px', color: 'white', display: 'flex', 
+                flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 10px 20px rgba(239, 68, 68, 0.2)' 
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ width: '45px', height: '35px', background: '#fcd34d', borderRadius: '4px', opacity: 0.8 }}></div>
+                  <span style={{ fontStyle: 'italic', fontWeight: 'bold', fontSize: '20px' }}>VISA</span>
+                </div>
+                <div style={{ fontSize: '20px', letterSpacing: '4px' }}>**** **** **** ****</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                  <span>CARD HOLDER</span>
+                  <span>EXPIRES</span>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Card Number</label>
+                <input type="text" placeholder="0000 0000 0000 0000" style={{ width: '100%', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0', outline: 'none', transition: 'border-color 0.2s' }} onFocus={(e) => e.target.style.borderColor = '#ef4444'} onBlur={(e) => e.target.style.borderColor = '#e2e8f0'} />
+              </div>
+
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '32px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>Expiry</label>
+                  <input type="text" placeholder="MM / YY" style={{ width: '100%', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0', outline: 'none' }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#475569', marginBottom: '8px' }}>CVV</label>
+                  <input type="password" placeholder="***" style={{ width: '100%', padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0', outline: 'none' }} />
+                </div>
+              </div>
+
+              <button
+                onClick={handlePayment}
+                disabled={processingPayment}
+                style={{
+                  width: "100%", background: processingPayment ? "#94a3b8" : "#1e293b", color: "#fff", border: "none",
+                  padding: "18px", borderRadius: "12px", fontSize: "16px", fontWeight: "700", cursor: processingPayment ? "not-allowed" : "pointer",
+                  transition: "transform 0.2s, background 0.2s"
+                }}
+                onMouseEnter={(e) => !processingPayment && (e.target.style.transform = 'scale(1.02)')}
+                onMouseLeave={(e) => !processingPayment && (e.target.style.transform = 'scale(1)')}
+              >
+                {processingPayment ? "Processing..." : `Confirm & Pay ${selectedPlan.price}`}
+              </button>
+            </div>
+          </div>
         </main>
       </div>
     );
   }
 
+  // HISTORY UI (Aesthetic Table)
   return (
-    <div className="page-wrapper">
-      <header className="site-header">
-        <div className="brand">GymPro</div>
+    <div className="page-wrapper" style={{ background: '#f8fafc', minHeight: '100vh' }}>
+      <header className="site-header" style={{ background: 'white', borderBottom: '1px solid #e2e8f0' }}>
+        <div className="brand">IRON MAN FITNESS</div>
         <div className="nav">
-          <button className="btn ghost" onClick={() => navigate("/dashboard")}>
-            Dashboard
-          </button>
-          <button className="btn ghost" onClick={() => navigate("/profile")}>
-            Profile
-          </button>
+          <button className="btn ghost" onClick={() => navigate("/dashboard")}>Dashboard</button>
         </div>
       </header>
 
-      <main className="payments-page">
-        {/* Header */}
-        <section style={{ paddingBottom: 32, borderBottom: "1px solid #e5e7eb" }}>
-          <div style={{ maxWidth: "1200px" }}>
-            <h1 style={{ fontSize: "36px", fontWeight: 700, margin: 0 }}>
-              Payment History
-            </h1>
+      <main style={{ maxWidth: '1100px', margin: '60px auto', padding: '0 20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px' }}>
+          <div>
+            <h1 style={{ fontSize: '36px', fontWeight: '800', color: '#1e293b' }}>Billing History</h1>
+            <p style={{ color: '#64748b' }}>Manage your subscriptions and download receipts</p>
           </div>
-        </section>
+        </div>
 
-        {/* Content */}
-        <section style={{ padding: "40px 0", minHeight: "60vh" }}>
-          {loading ? (
-            <div style={{ textAlign: "center", padding: "40px 20px" }}>
-              <div style={{ fontSize: "16px", color: "rgba(17,24,39,0.6)" }}>
-                Loading payment history...
-              </div>
-            </div>
-          ) : payments.length > 0 ? (
-            <div style={{ maxWidth: "1000px" }}>
-              <div style={{ overflowX: "auto" }}>
-                <div style={{ background: 'rgba(17,24,39,0.04)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(17,24,39,0.04)' }}>
-                <table style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  fontSize: "14px",
-                }}>
-                  <thead>
-                    <tr style={{ borderBottom: "2px solid #e5e7eb", background: "#f9fafb" }}>
-                      <th style={{ padding: "16px", textAlign: "left", fontWeight: 600, color: "rgba(17,24,39,0.8)" }}>
-                        Transaction ID
-                      </th>
-                      <th style={{ padding: "16px", textAlign: "left", fontWeight: 600, color: "rgba(17,24,39,0.8)" }}>
-                        Date
-                      </th>
-                      <th style={{ padding: "16px", textAlign: "left", fontWeight: 600, color: "rgba(17,24,39,0.8)" }}>
-                        Plan
-                      </th>
-                      <th style={{ padding: "16px", textAlign: "left", fontWeight: 600, color: "rgba(17,24,39,0.8)" }}>
-                        Amount
-                      </th>
-                      <th style={{ padding: "16px", textAlign: "left", fontWeight: 600, color: "rgba(17,24,39,0.8)" }}>
-                        Method
-                      </th>
-                      <th style={{ padding: "16px", textAlign: "left", fontWeight: 600, color: "rgba(17,24,39,0.8)" }}>
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {payments.map((payment) => (
-                      <tr key={payment.id} style={{ borderBottom: "1px solid #e5e7eb", transition: "background 0.2s ease" }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = "#f9fafb"}
-                        onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-                      >
-                        <td style={{ padding: "16px", color: "var(--text-dark)", fontWeight: 500 }}>
-                          {payment.id}
-                        </td>
-                        <td style={{ padding: "16px", color: "rgba(17,24,39,0.7)" }}>
-                          {new Date(payment.date).toLocaleDateString("en-IN", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </td>
-                        <td style={{ padding: "16px", color: "rgba(17,24,39,0.7)" }}>
-                          {payment.plan}
-                        </td>
-                        <td style={{ padding: "16px", fontWeight: 600, color: "#059669" }}>
-                          {(() => {
-                            const raw = payment.amount;
-                            if (typeof raw === 'string' && raw.trim().startsWith('₹')) return raw;
-                            if (typeof raw === 'string') {
-                              // try parse numeric
-                              const n = parseFloat(raw.replace(/[^0-9.]/g, '')) || 0;
-                              return `₹${new Intl.NumberFormat('en-IN').format(n)}`;
-                            }
-                            return `₹${new Intl.NumberFormat('en-IN').format(Number(raw || 0))}`;
-                          })()}
-                        </td>
-                        <td style={{ padding: "16px", color: "rgba(17,24,39,0.7)" }}>
-                          {payment.method}
-                        </td>
-                        <td style={{ padding: "16px" }}>
-                          <span style={{
-                            background: "#ecfdf5",
-                            color: "#059669",
-                            padding: "6px 12px",
-                            borderRadius: "6px",
-                            fontSize: "12px",
-                            fontWeight: 600,
-                            display: "inline-block",
-                          }}>
-                            ✓ {payment.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                </div>
-              </div>
-            </div>
-          ) : (
-            // Empty State
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: "50vh",
-            }}>
-              <div style={{
-                textAlign: "center",
-                maxWidth: "400px",
-              }}>
-                <div style={{
-                  width: "80px",
-                  height: "80px",
-                  background: "linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%)",
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "0 auto 24px",
-                  fontSize: "36px",
-                }}>
-                  💳
-                </div>
-
-                <h2 style={{
-                  fontSize: "22px",
-                  fontWeight: 700,
-                  color: "var(--text-dark)",
-                  marginBottom: 8,
-                  margin: 0,
-                }}>
-                  No Payment History Yet
-                </h2>
-
-                <p style={{
-                  fontSize: "14px",
-                  color: "rgba(17,24,39,0.6)",
-                  marginBottom: 24,
-                  lineHeight: "1.6",
-                  margin: "0 0 24px 0",
-                }}>
-                  You haven't made any payments yet. Start your fitness journey by choosing a membership plan that fits your goals.
-                </p>
-
-                <button
-                  onClick={() => navigate("/members")}
-                  style={{
-                    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                    color: "#fff",
-                    border: "none",
-                    padding: "12px 28px",
-                    borderRadius: "8px",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                    boxShadow: "0 4px 12px rgba(102, 126, 234, 0.4)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = "translateY(-2px)";
-                    e.target.style.boxShadow = "0 6px 16px rgba(102, 126, 234, 0.5)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = "translateY(0)";
-                    e.target.style.boxShadow = "0 4px 12px rgba(102, 126, 234, 0.4)";
-                  }}
-                >
-                  View Membership Plans
-                </button>
-
-                <p style={{
-                  fontSize: "12px",
-                  color: "rgba(17,24,39,0.5)",
-                  marginTop: 16,
-                }}>
-                  ✨ Flexible plans • No long-term contracts • Cancel anytime
-                </p>
-              </div>
-            </div>
-          )}
-        </section>
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "100px" }}>Loading your records...</div>
+        ) : payments.length > 0 ? (
+          <div style={{ background: 'white', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ background: "#f8fafc", borderBottom: '1px solid #e2e8f0' }}>
+                  <th style={{ padding: "20px", textAlign: "left", fontSize: '13px', color: '#64748b', textTransform: 'uppercase' }}>Transaction</th>
+                  <th style={{ padding: "20px", textAlign: "left", fontSize: '13px', color: '#64748b', textTransform: 'uppercase' }}>Plan</th>
+                  <th style={{ padding: "20px", textAlign: "left", fontSize: '13px', color: '#64748b', textTransform: 'uppercase' }}>Amount</th>
+                  <th style={{ padding: "20px", textAlign: "left", fontSize: '13px', color: '#64748b', textTransform: 'uppercase' }}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map((payment) => (
+                  <tr key={payment.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: "20px" }}>
+                      <div style={{ fontWeight: '600', color: '#1e293b' }}>{payment.id}</div>
+                      <div style={{ fontSize: '12px', color: '#94a3b8' }}>{new Date(payment.date).toLocaleDateString()}</div>
+                    </td>
+                    <td style={{ padding: "20px", color: '#475569' }}>{payment.plan}</td>
+                    <td style={{ padding: "20px", fontWeight: '700', color: '#1e293b' }}>{payment.amount}</td>
+                    <td style={{ padding: "20px" }}>
+                      <span style={{ background: "#dcfce7", color: "#166534", padding: "6px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: '600' }}>
+                        ● Completed
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          /* Empty State Redesigned */
+          <div style={{ textAlign: 'center', background: 'white', padding: '80px 40px', borderRadius: '32px', border: '2px dashed #e2e8f0' }}>
+            <div style={{ fontSize: '50px', marginBottom: '20px' }}>💳</div>
+            <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b' }}>No transactions found</h2>
+            <p style={{ color: '#64748b', marginBottom: '32px' }}>You haven't purchased any membership plans yet.</p>
+            <button onClick={() => navigate("/members")} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '14px 28px', borderRadius: '12px', fontWeight: '600', cursor: 'pointer' }}>
+              Explore Membership Plans
+            </button>
+          </div>
+        )}
       </main>
-
-      <footer className="site-footer">
-        <div>© GymPro 2026</div>
-        <div>Secure payment history and transaction management</div>
-      </footer>
     </div>
   );
 }
